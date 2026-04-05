@@ -2,802 +2,497 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shivam Furniture – Bill Generator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shivam Furniture</title>
   <style>
-    /* ─── Reset & Variables ─── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0f0f13; --surface: #18181f; --card: #1e1e28; --border: #2e2e3e;
-      --accent: #7c6af7; --accent2: #c084fc; --text: #e2e2f0; --muted: #8080a0;
-      --danger: #f87171; --success: #34d399; --radius: 14px;
-      --shadow: 0 8px 32px rgba(0,0,0,.45);
+      --bg: #000000; --card: #1C1C1E; --sep: #38383A;
+      --blue: #0A84FF; --green: #30D158; --red: #FF453A;
+      --text: #FFFFFF; --text-sec: #8E8E93;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-    /* ─── App Header ─── */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; padding-bottom: 60px; }
+    
+    /* Nav Bar */
     .app-header {
-      background: linear-gradient(135deg, #1a1030 0%, #0f0f1a 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 22px 40px; display: flex; align-items: center; gap: 18px;
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--sep);
+      padding: 14px 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
     }
-    .app-logo {
-      width: 48px; height: 48px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 12px; display: grid; place-items: center; font-size: 22px;
-    }
-    .app-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.3px; }
-    .app-title p  { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .app-title h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; color: var(--text); text-align: center; }
+    .app-title p { font-size: 13px; color: var(--text-sec); text-align: center; margin-top: 2px; }
 
-    /* ─── Layout ─── */
-    .container { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    @media(max-width:900px){ .grid-2 { grid-template-columns: 1fr; } }
+    .container { max-width: 800px; margin: 0 auto; }
 
-    /* ─── Cards ─── */
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
-    }
-    .card-title {
-      font-size: .7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--accent2); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
-    }
-    .card-title::before {
-      content:''; display: block; width: 4px; height: 16px;
-      background: linear-gradient(var(--accent), var(--accent2)); border-radius: 4px;
-    }
+    /* iOS Groups */
+    .ios-section-header { font-size: 13px; text-transform: uppercase; color: var(--text-sec); margin: 28px 20px 8px; letter-spacing: -0.1px; }
+    .ios-section-footer { font-size: 13px; color: var(--text-sec); margin: 8px 20px 20px; line-height: 1.4; }
+    .ios-group { background: var(--card); border-radius: 10px; margin: 0 16px; overflow: hidden; }
+    .ios-cell { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; position: relative; min-height: 48px; }
+    .ios-cell:not(:last-child)::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 0; height: 0.5px; background-color: var(--sep); }
+    .ios-cell.col { flex-direction: column; align-items: flex-start; }
+    
+    /* Inputs */
+    .ios-label { font-size: 17px; color: var(--text); flex-shrink: 0; }
+    .ios-input, .ios-textarea { background: transparent; border: none; color: var(--text); font-size: 17px; text-align: right; flex: 1; min-width: 0; outline: none; padding-left: 12px; }
+    .ios-input::placeholder, .ios-textarea::placeholder { color: var(--text-sec); }
+    .ios-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; cursor: pointer; }
+    .ios-textarea { text-align: left; resize: vertical; min-height: 44px; margin-top: 6px; padding-left: 0; width: 100%; max-width: 100%; }
 
-    /* ─── Form Elements ─── */
-    label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: 6px; }
-    input, select, textarea {
-      width: 100%; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 9px; padding: 10px 14px; color: var(--text);
-      font-family: inherit; font-size: .88rem; outline: none;
-      transition: border .2s, box-shadow .2s;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,106,247,.18);
-    }
-    input::placeholder { color: var(--muted); }
-    select option { background: var(--surface); }
-    .form-group { margin-bottom: 14px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    /* Switches */
+    .switch-wrap { position: relative; width: 51px; height: 31px; border-radius: 31px; background: #39393D; transition: background 0.25s; cursor: pointer; }
+    .switch-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .switch-knob { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; background: #FFFFFF; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.25s; pointer-events: none; }
+    .switch-wrap input:checked + .switch-knob { transform: translateX(20px); }
+    .switch-wrap.on-bg { background: var(--green); }
 
-    /* ─── Buttons ─── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px;
-      border: none; border-radius: 9px; font-family: inherit; font-size: .85rem;
-      font-weight: 600; cursor: pointer; transition: all .2s;
-    }
-    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-    .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
-    .btn-danger { background: rgba(248,113,113,.15); color: var(--danger); border: 1px solid rgba(248,113,113,.3); }
-    .btn-danger:hover { background: rgba(248,113,113,.28); }
-    .btn-success { background: linear-gradient(135deg, #059669, #34d399); color: #fff; }
-    .btn-success:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-sm { padding: 6px 12px; font-size: .78rem; }
+    /* Segmented Control */
+    .segmented-control { display: flex; background: #1C1C1E; border-radius: 8px; padding: 2px; width: 100%; max-width: 300px; border: 1px solid var(--sep); }
+    .segment-btn { flex: 1; padding: 6px 0; font-size: 13px; font-weight: 600; text-align: center; color: var(--text); border-radius: 6px; cursor: pointer; transition: background 0.2s; border: none; background: transparent; }
+    .segment-btn.active { background: #636366; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
 
-    /* ─── Items Table (editor) ─── */
-    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    .items-table th {
-      background: rgba(124,106,247,.12); padding: 10px 12px;
-      font-size: .72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-      color: var(--muted); text-align: left; border-bottom: 1px solid var(--border);
-    }
-    .items-table td { padding: 6px; border-bottom: 1px solid rgba(46,46,62,.5); vertical-align: middle; }
-    .items-table td input { background: var(--surface); border: 1px solid transparent; padding: 7px 10px; }
-    .items-table td input:focus { border-color: var(--accent); }
-    .row-total { font-weight: 600; color: var(--success); font-size: .88rem; padding: 6px 10px; }
+    /* Buttons */
+    .btn { display: flex; align-items: center; justify-content: center; height: 50px; border-radius: 12px; font-size: 17px; font-weight: 600; color: #FFFFFF; border: none; cursor: pointer; transition: transform 0.15s, opacity 0.15s; width: 100%; margin-top: 16px; box-sizing: border-box; }
+    .btn:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-primary { background: var(--blue); }
+    .btn-success { background: var(--green); }
+    .btn-action { background: #2C2C2E; color: var(--blue); margin: 0 16px; width: calc(100% - 32px); margin-top: 24px; }
+    .btn-clear { background: #2C2C2E; color: var(--red); margin: 0 16px 32px; width: calc(100% - 32px); }
 
-    /* ─── Toggle ─── */
-    .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .toggle-label { font-size: .83rem; color: var(--muted); }
-    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-track {
-      position: absolute; inset: 0; background: var(--border);
-      border-radius: 24px; cursor: pointer; transition: background .25s;
-    }
-    .toggle-track::after {
-      content: ''; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px;
-      background: #fff; border-radius: 50%; transition: transform .25s;
-    }
-    .toggle input:checked + .toggle-track { background: var(--accent); }
-    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+    /* Delete Circle Button */
+    .btn-circular-delete { width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: white; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; margin: 0 auto; }
 
-    /* ─── Tax type selector ─── */
-    .tax-type-box {
-      display: flex; gap: 10px; margin-bottom: 16px;
-    }
-    .tax-type-btn {
-      flex: 1; padding: 10px 14px; border-radius: 10px; cursor: pointer;
-      border: 2px solid var(--border); background: var(--surface);
-      color: var(--muted); font-family: inherit; font-size: .84rem; font-weight: 600;
-      text-align: center; transition: all .2s;
-    }
-    .tax-type-btn.active {
-      border-color: var(--accent); background: rgba(124,106,247,.15); color: var(--accent2);
-    }
+    /* Items Table UI */
+    .items-table-ui { width: 100%; border-collapse: collapse; }
+    .items-table-ui th { font-size: 11px; text-transform: uppercase; color: var(--text-sec); padding: 8px; text-align: center; font-weight: 500; border-bottom: 0.5px solid var(--sep); }
+    .items-table-ui td { padding: 8px; border-bottom: 0.5px solid var(--sep); vertical-align: middle; }
+    .ios-num { width: 100%; background: transparent; border: none; color: var(--text); text-align: center; font-size: 15px; outline: none; }
+    .ios-text { width: 100%; background: transparent; border: none; color: var(--text); font-size: 15px; outline: none; box-sizing: border-box; }
+    .items-table-ui .row-total { font-size: 15px; color: var(--text-sec); }
 
-    /* ─── GST rate row ─── */
-    .tax-row {
-      display: flex; align-items: center; gap: 14px;
-      background: rgba(124,106,247,.08); border: 1px solid rgba(124,106,247,.2);
-      border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
-    }
-    .tax-row label { margin: 0; font-size: .83rem; white-space: nowrap; }
-    .tax-row input { max-width: 80px; }
-
-    /* ─── Actions bar ─── */
-    .actions-bar {
-      display: flex; gap: 12px; flex-wrap: wrap;
-      margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);
-    }
-
-    /* ─── Preview wrap ─── */
-    #preview-wrap {
-      margin-top: 36px; background: #e8e8e8;
-      border-radius: var(--radius); overflow: hidden;
-      box-shadow: 0 24px 64px rgba(0,0,0,.6); display: none;
-    }
+    #preview-wrap { background: #FFFFFF; margin: 24px 16px; border-radius: 12px; overflow: hidden; display: none; }
     #preview-wrap.visible { display: block; }
-
-    /* ─── A4 container for preview ─── */
-    .a4-page {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 20px auto;
-      background: #fff;
-      box-shadow: 0 4px 24px rgba(0,0,0,.3);
-      position: relative;
-    }
+    .a4-page { width: 210mm; min-height: 297mm; margin: 0 auto; position: relative; zoom: 0.8; transform-origin: top center; }
+    @media(max-width: 600px) { .a4-page { zoom: 0.45; } }
 
     /* ════════════════════════════════════════
        BILL STYLES  (applies inside .a4-page)
     ════════════════════════════════════════ */
-    #bill {
-      font-family: Arial, sans-serif;
-      color: #111;
-      background: #fff;
-      font-size: 9.5pt;
-      padding: 12mm 14mm 14mm;
-      min-height: 297mm;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* "INVOICE" title at very top */
-    #bill .invoice-title {
-      text-align: center;
-      font-size: 10pt;
-      font-weight: 700;
-      text-decoration: underline;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-
-    /* Shop header box */
-    #bill .bill-header {
-      text-align: center;
-      border: 2px solid #000;
-      padding: 10px 10px 8px;
-    }
-    #bill .shop-name {
-      font-size: 22pt;
-      font-weight: 900;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-family: 'Arial Black', Arial, sans-serif;
-      line-height: 1.1;
-    }
+    #bill { font-family: Arial, sans-serif; color: #111; background: #fff; font-size: 9.5pt; padding: 12mm 14mm 14mm; min-height: 297mm; display: flex; flex-direction: column; }
+    #bill .invoice-title { text-align: center; font-size: 10pt; font-weight: 700; text-decoration: underline; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    #bill .bill-header { text-align: center; border: 2px solid #000; padding: 10px 10px 8px; }
+    #bill .shop-name { font-size: 22pt; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-family: 'Arial Black', Arial, sans-serif; line-height: 1.1; }
     #bill .shop-addr { font-size: 8.5pt; color: #333; margin: 3px 0; }
     #bill .shop-phone { font-size: 8.5pt; margin: 2px 0; }
     #bill .shop-gstin { font-size: 9pt; font-weight: 700; margin-top: 5px; }
-
-    /* Serial / Date row */
-    #bill .meta-row {
-      display: flex; justify-content: flex-end; align-items: center;
-      padding: 5px 10px;
-      border-left: 2px solid #000; border-right: 2px solid #000;
-      border-bottom: 1px solid #888;
-      font-size: 8.5pt;
-    }
-
-    /* Buyer box */
-    #bill .buyer-box {
-      border-left: 2px solid #000; border-right: 2px solid #000;
-      border-bottom: 1px solid #888;
-      padding: 8px 10px;
-      display: flex; justify-content: space-between; align-items: flex-start;
-    }
+    #bill .meta-row { display: flex; justify-content: flex-end; align-items: center; padding: 5px 10px; border-left: 2px solid #000; border-right: 2px solid #000; border-bottom: 1px solid #888; font-size: 8.5pt; }
+    #bill .composite-notice { text-align: center; border-left: 2px solid #000; border-right: 2px solid #000; border-bottom: 1px solid #888; padding: 5px 10px; font-size: 8.5pt; }
+    #bill .buyer-box { border-left: 2px solid #000; border-right: 2px solid #000; border-bottom: 1px solid #888; padding: 8px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
     #bill .buyer-left { font-size: 8.5pt; line-height: 1.65; }
     #bill .buyer-label { font-weight: 700; font-size: 8.5pt; }
-    #bill .buyer-name  { font-weight: 700; }
-    #bill .buyer-date  { font-size: 8.5pt; white-space: nowrap; }
-
-    /* Items table */
-    #bill table.items {
-      width: 100%; border-collapse: collapse;
-      border-left: 2px solid #000; border-right: 2px solid #000;
-    }
-    #bill table.items th {
-      border: 1px solid #000; padding: 6px 8px;
-      font-size: 8pt; font-weight: 700; text-align: center; text-transform: uppercase;
-      background: #f0f0f0;
-    }
-    #bill table.items td {
-      border: 1px solid #888; padding: 5.5px 8px;
-      font-size: 8.5pt; text-align: center;
-    }
+    #bill .buyer-name { font-weight: 700; }
+    #bill .buyer-date { font-size: 8.5pt; white-space: nowrap; }
+    #bill table.items { width: 100%; border-collapse: collapse; border-left: 2px solid #000; border-right: 2px solid #000; }
+    #bill table.items th { border: 1px solid #000; padding: 6px 8px; font-size: 8pt; font-weight: 700; text-align: center; text-transform: uppercase; background: #f0f0f0; }
+    #bill table.items td { border: 1px solid #888; padding: 5.5px 8px; font-size: 8.5pt; text-align: center; }
     #bill table.items td.item-name { text-align: left; }
-
-    /* Summary rows */
-    #bill .summary-row {
-      display: flex; justify-content: space-between; align-items: center;
-      border-left: 2px solid #000; border-right: 2px solid #000;
-      border-bottom: 1px solid #aaa;
-      padding: 6px 10px; font-size: 8.5pt;
-    }
-    #bill .summary-row.bold-row {
-      font-weight: 700; font-size: 9pt;
-      border-bottom: 1px solid #555;
-    }
-    #bill .summary-row.total-row {
-      font-weight: 900; font-size: 10pt;
-      border-bottom: 2px solid #000; border-top: 1px solid #000;
-      background: #f4f4f4;
-    }
+    #bill .summary-row { display: flex; justify-content: space-between; align-items: center; border-left: 2px solid #000; border-right: 2px solid #000; border-bottom: 1px solid #aaa; padding: 6px 10px; font-size: 8.5pt; }
+    #bill .summary-row.bold-row { font-weight: 700; font-size: 9pt; border-bottom: 1px solid #555; }
+    #bill .summary-row.total-row { font-weight: 900; font-size: 10pt; border-bottom: 2px solid #000; border-top: 1px solid #000; background: #f4f4f4; }
     #bill .summary-row .amt { font-weight: 700; }
     #bill .summary-row.total-row .amt { font-weight: 900; }
-
-    /* add: label block */
     #bill .add-block { font-size: 8.5pt; }
     #bill .add-block .add-head { font-weight: 700; font-size: 8.5pt; }
-
-    /* Words section */
-    #bill .words-section {
-      padding: 10px 10px 6px;
-      border-left: 2px solid #000; border-right: 2px solid #000;
-      border-bottom: 1px solid #ccc;
-      font-size: 8.5pt;
-    }
+    #bill .words-section { padding: 10px 10px 6px; border-left: 2px solid #000; border-right: 2px solid #000; border-bottom: 1px solid #ccc; font-size: 8.5pt; }
     #bill .words-lbl { font-size: 8pt; color: #555; }
     #bill .words-val { font-weight: 700; font-size: 9pt; margin-top: 3px; }
-
-    /* Bank section */
-    #bill .bank-section {
-      padding: 8px 10px 10px;
-      font-size: 8.5pt;
-    }
+    #bill .bank-section { padding: 8px 10px 10px; font-size: 8.5pt; }
     #bill .bank-title { font-weight: 700; font-size: 8.5pt; margin-bottom: 5px; }
-    #bill .bank-grid {
-      display: grid; grid-template-columns: 100px 1fr;
-      gap: 2px 0; font-size: 8pt;
-    }
+    #bill .bank-grid { display: grid; grid-template-columns: 100px 1fr; gap: 2px 0; font-size: 8pt; }
     #bill .bank-key { color: #444; }
-
-    /* Signature — pushed to very bottom */
     #bill .bill-body { flex: 1; }
-    #bill .sign-section {
-      margin-top: auto;
-      padding-top: 24px;
-      text-align: right;
-      font-size: 8pt;
-    }
-    #bill .signature-img {
-      display: inline-block;
-      max-width: 160px;
-      max-height: 80px;
-      margin-bottom: 5px;
-    }
+    #bill .sign-section { margin-top: auto; padding-top: 24px; text-align: right; font-size: 8pt; }
+    #bill .signature-img { display: inline-block; max-width: 160px; max-height: 80px; margin-bottom: 5px; }
     #bill .sign-name { font-size: 9pt; color: #333; font-weight: 700; }
 
-    /* ─── Print Styles ─── */
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
+    @page { size: A4 portrait; margin: 0; }
     @media print {
       html, body { margin: 0; padding: 0; background: #fff !important; }
       body > *:not(#preview-wrap) { display: none !important; }
-      #preview-wrap {
-        display: block !important; margin: 0 !important;
-        border-radius: 0 !important; box-shadow: none !important;
-        background: #fff !important;
-      }
+      #preview-wrap { display: block !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: #fff !important; }
       .no-print { display: none !important; }
-      .a4-page {
-        width: 210mm !important;
-        min-height: 297mm !important;
-        margin: 0 !important;
-        box-shadow: none !important;
-        page-break-after: always;
-      }
-      #bill {
-        padding: 12mm 14mm 14mm !important;
-        min-height: 297mm !important;
-      }
+      .a4-page { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
+      #bill { padding: 12mm 14mm 14mm !important; min-height: 297mm !important; }
     }
-
-    /* ─── Misc UI ─── */
-    .divider { height: 1px; background: var(--border); margin: 18px 0; }
-    .hint { font-size: .75rem; color: var(--muted); margin-top: 4px; }
   </style>
 </head>
 <body>
+  <header class="app-header">
+    <div class="app-title">
+      <h1>Shivam Furniture</h1>
+      <p>Bill Generator</p>
+    </div>
+  </header>
 
-<!-- ══ App Header ══ -->
-<header class="app-header">
-  <div class="app-logo">🪑</div>
-  <div class="app-title">
-    <h1>Shivam Furniture – Bill Generator</h1>
-    <p>Create professional GST invoices instantly</p>
-  </div>
-</header>
-
-<!-- ══ Main Content ══ -->
-<div class="container">
-
-  <div class="grid-2">
-    <!-- ── Column 1: Invoice + Buyer ── -->
-    <div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-title">Invoice Details</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Serial / Invoice No.</label>
-            <input type="text" id="invoiceNo" placeholder="e.g. SF 114" />
-          </div>
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="invoiceDate" />
-          </div>
-        </div>
+  <div class="container">
+    <div class="ios-section-header">Invoice Details</div>
+    <div class="ios-group">
+      <div class="ios-cell">
+        <label class="ios-label">Serial No.</label>
+        <input type="text" id="invoiceNo" class="ios-input" placeholder="e.g. SF 114" />
       </div>
-
-      <div class="card">
-        <div class="card-title">Buyer Details</div>
-        <div class="form-group">
-          <label>Buyer Name</label>
-          <input type="text" id="buyerName" placeholder="Full name" />
-        </div>
-        <div class="form-group">
-          <label>Address</label>
-          <textarea id="buyerAddr" rows="2" placeholder="Street, City, State, PIN"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phone No.</label>
-            <input type="text" id="buyerPhone" placeholder="10-digit mobile" />
-          </div>
-          <div class="form-group">
-            <label>GSTIN (optional)</label>
-            <input type="text" id="buyerGSTIN" placeholder="e.g. 22AAAAA0000A1Z5" style="text-transform:uppercase" />
-          </div>
-        </div>
+      <div class="ios-cell">
+        <label class="ios-label">Date</label>
+        <input type="date" id="invoiceDate" class="ios-input" />
       </div>
     </div>
 
-    <!-- ── Column 2: Tax + Bank ── -->
-    <div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-title">Settings & Defaults</div>
-        <div class="form-group" style="margin-bottom:0">
-          <label>Signature / Stamp Image</label>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <input type="file" id="sigUploadInput" accept="image/*" onchange="handleSetupSignature(event)" style="padding:4px" />
-          </div>
-          <p class="hint">Upload your signature once here. It saves automatically for all future printed bills!</p>
-        </div>
+    <div class="ios-section-header">Buyer Details</div>
+    <div class="ios-group">
+      <div class="ios-cell">
+        <label class="ios-label">Name</label>
+        <input type="text" id="buyerName" class="ios-input" placeholder="Buyer Name" />
       </div>
-
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-title">Tax Configuration</div>
-
-        <!-- GST Rate -->
-        <div class="tax-row">
-          <label>GST Rate (%)</label>
-          <input type="number" id="gstRate" value="18" min="0" max="100" step=".01" />
-          <span class="hint" style="margin:0">Total GST %</span>
-        </div>
-
-        <!-- Tax Type: IGST vs CGST+SGST -->
-        <label style="margin-bottom:8px">Tax Type</label>
-        <div class="tax-type-box">
-          <button class="tax-type-btn active" id="btn-igst" onclick="setTaxType('igst')">IGST</button>
-          <button class="tax-type-btn" id="btn-cgst" onclick="setTaxType('cgst')">CGST + SGST</button>
-        </div>
-        <p class="hint" id="tax-hint" style="margin-bottom:14px">Single IGST line on bill.</p>
-
-        <!-- Price incl tax toggle -->
-        <div class="toggle-row">
-          <label class="toggle">
-            <input type="checkbox" id="priceInclTax" />
-            <span class="toggle-track"></span>
-          </label>
-          <span class="toggle-label">Prices entered <strong>include GST</strong> (back-calculate pre-tax)</span>
-        </div>
-        <p class="hint">Toggle ON when your prices already include GST.</p>
-
-        <div class="divider"></div>
-
-        <!-- Bank Details -->
-        <div class="card-title" style="margin-bottom:12px">Bank Details</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Bank Name</label>
-            <input type="text" id="bankName" value="ICICI Bank" />
-          </div>
-          <div class="form-group">
-            <label>Branch</label>
-            <input type="text" id="bankBranch" value="Jatia" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Account Number</label>
-            <input type="text" id="bankAcc" value="416405000060" />
-          </div>
-          <div class="form-group">
-            <label>IFSC Code</label>
-            <input type="text" id="bankIFSC" value="ICIC0004164" />
-          </div>
-        </div>
+      <div class="ios-cell">
+        <label class="ios-label">Phone</label>
+        <input type="tel" id="buyerPhone" class="ios-input" placeholder="10-digit mobile" />
+      </div>
+      <div class="ios-cell">
+        <label class="ios-label">GSTIN</label>
+        <input type="text" id="buyerGSTIN" class="ios-input" placeholder="Optional" style="text-transform:uppercase" />
+      </div>
+      <div class="ios-cell col">
+        <label class="ios-label" style="margin-bottom:2px">Address</label>
+        <textarea id="buyerAddr" class="ios-textarea" placeholder="Street, City, State, PIN" rows="2"></textarea>
       </div>
     </div>
+
+    <div class="ios-section-header">Tax Configuration</div>
+    <div class="ios-group">
+      <div class="ios-cell">
+        <label class="ios-label">Composite Bill</label>
+        <label class="switch-wrap" id="compWrap">
+          <input type="checkbox" id="compositeBill" onchange="toggleCompositeBill()" />
+          <div class="switch-knob"></div>
+        </label>
+      </div>
+      <div class="ios-cell">
+        <label class="ios-label">Prices Include GST</label>
+        <label class="switch-wrap" id="priceWrap">
+          <input type="checkbox" id="priceInclTax" onchange="togglePriceIncl()" />
+          <div class="switch-knob"></div>
+        </label>
+      </div>
+      <div class="ios-cell" style="justify-content:center">
+        <div class="segmented-control">
+          <button class="segment-btn active" id="btn-igst" onclick="setTaxType('igst')">IGST</button>
+          <button class="segment-btn" id="btn-cgst" onclick="setTaxType('cgst')">CGST + SGST</button>
+        </div>
+      </div>
+      <div class="ios-cell">
+        <label class="ios-label">GST Rate (%)</label>
+        <input type="number" id="gstRate" class="ios-input" value="18" min="0" max="100" step=".01" style="max-width:80px" />
+      </div>
+    </div>
+    <div class="ios-section-footer" id="tax-hint">Single IGST line on bill. Settings auto-adjust.</div>
+
+    <div class="ios-section-header">Bank Details</div>
+    <div class="ios-group">
+      <div class="ios-cell">
+        <label class="ios-label">Bank Name</label>
+        <input type="text" id="bankName" class="ios-input" value="ICICI Bank" />
+      </div>
+      <div class="ios-cell">
+        <label class="ios-label">Branch</label>
+        <input type="text" id="bankBranch" class="ios-input" value="Jatia" />
+      </div>
+      <div class="ios-cell">
+        <label class="ios-label">Account No</label>
+        <input type="text" id="bankAcc" class="ios-input" value="416405000060" />
+      </div>
+      <div class="ios-cell">
+        <label class="ios-label">IFSC Code</label>
+        <input type="text" id="bankIFSC" class="ios-input" value="ICIC0004164" />
+      </div>
+    </div>
+
+    <div class="ios-section-header">Signature Setup</div>
+    <div class="ios-group">
+      <div class="ios-cell">
+        <input type="file" id="sigUploadInput" accept="image/*" onchange="handleSetupSignature(event)" style="font-size:14px; width:100%" />
+      </div>
+    </div>
+
+    <div class="ios-section-header">Line Items</div>
+    <div class="ios-group" style="padding-bottom: 8px;">
+      <table class="items-table-ui">
+        <thead><tr><th>#</th><th style="text-align:left">Item</th><th>HSN</th><th>Rate</th><th>Qty</th><th style="text-align:right">Total</th><th></th></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <button class="btn btn-action" onclick="addRow()" style="background:transparent; margin-top:4px">＋ Add Item</button>
+    </div>
+
+    <!-- Actions -->
+    <div style="padding: 0 16px; margin-top: 32px">
+      <button class="btn btn-primary" onclick="generateBill()">Generate Bill Preview</button>
+      <button class="btn btn-success" onclick="printBill()">Print / Save PDF</button>
+    </div>
+    
+    <button class="btn btn-clear" onclick="clearAll()">Clear All Fields</button>
+
+    <div id="preview-wrap">
+      <div class="no-print" style="padding:16px;background:#E5E5EA;text-align:center;font-weight:600;color:#000;border-bottom:1px solid #C7C7CC;">📄 A4 Preview</div>
+      <div class="a4-page"><div id="bill"></div></div>
+    </div>
+
   </div>
 
-  <!-- ── Items Section ── -->
-  <div class="card" style="margin-top:24px">
-    <div class="card-title">Line Items</div>
-    <table class="items-table" id="itemsTable">
-      <thead>
-        <tr>
-          <th style="width:50px">SL No</th>
-          <th>Item Name</th>
-          <th style="width:110px">HSN Code</th>
-          <th style="width:130px">Rate (₹)</th>
-          <th style="width:100px">Qty</th>
-          <th style="width:140px">Total (₹)</th>
-          <th style="width:44px"></th>
-        </tr>
-      </thead>
-      <tbody id="itemsBody"></tbody>
-    </table>
-    <button class="btn btn-ghost btn-sm" onclick="addRow()">＋ Add Item</button>
-  </div>
+  <script>
+    /* ── Tax type state ── */
+    let taxType = 'igst';
 
-  <!-- ── Actions ── -->
-  <div class="actions-bar">
-    <button class="btn btn-primary" onclick="generateBill()">🧾 Generate Bill Preview</button>
-    <button class="btn btn-success" onclick="printBill()">🖨️ Print / Save as PDF</button>
-    <button class="btn btn-ghost" onclick="clearAll()">🗑️ Clear All</button>
-  </div>
+    function toggleCompositeBill() {
+      const isComp = document.getElementById('compositeBill').checked;
+      document.getElementById('gstRate').disabled = isComp;
+      document.getElementById('priceInclTax').disabled = isComp;
+      document.querySelectorAll('.segment-btn').forEach(btn => btn.style.pointerEvents = isComp ? 'none' : 'auto');
+      document.querySelectorAll('.segment-btn').forEach(btn => btn.style.opacity = isComp ? '0.5' : '1');
+      document.getElementById('gstRate').style.opacity = isComp ? '0.5' : '1';
+      document.getElementById('priceInclTax').parentNode.style.opacity = isComp ? '0.5' : '1';
+      
+      const compWrap = document.getElementById('compWrap');
+      if(isComp) { compWrap.classList.add('on-bg'); } else { compWrap.classList.remove('on-bg'); }
 
-</div><!-- /container -->
-
-<!-- ── Preview Pane ── -->
-<div id="preview-wrap">
-  <div class="no-print" style="background:#1e1e28;padding:12px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #2e2e3e">
-    <span style="font-size:.82rem;color:#8080a0">📄 A4 Preview</span>
-    <button class="btn btn-success btn-sm" onclick="printBill()">🖨️ Print / Save PDF</button>
-  </div>
-  <!-- A4 page wrapper -->
-  <div class="a4-page">
-    <div id="bill"></div>
-  </div>
-</div>
-
-<!-- ══ JavaScript ══ -->
-<script>
-/* ── Tax type state ── */
-let taxType = 'igst'; // 'igst' | 'cgst'
-
-function setTaxType(t) {
-  taxType = t;
-  document.getElementById('btn-igst').classList.toggle('active', t === 'igst');
-  document.getElementById('btn-cgst').classList.toggle('active', t === 'cgst');
-  document.getElementById('tax-hint').textContent =
-    t === 'igst'
-      ? 'Single IGST line on bill.'
-      : 'Tax split equally: CGST + SGST (half each).';
-}
-
-/* ── Indian number format ── */
-function fmtINR(n) {
-  n = Math.round(n * 100) / 100;
-  let [int, dec] = n.toFixed(2).split('.');
-  let last3 = int.slice(-3);
-  let rest   = int.slice(0, -3);
-  if (rest.length) last3 = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
-  return last3 + '.' + dec;
-}
-
-/* ── Amount in words ── */
-const _ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
-  'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
-const _tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-
-function numToWords(n) {
-  n = Math.round(n);
-  if (n === 0) return 'Zero';
-  let w = '';
-  if (n >= 10000000) { w += numToWords(Math.floor(n/10000000)) + ' Crore '; n %= 10000000; }
-  if (n >= 100000)   { w += numToWords(Math.floor(n/100000))   + ' Lakh ';  n %= 100000; }
-  if (n >= 1000)     { w += numToWords(Math.floor(n/1000))     + ' Thousand '; n %= 1000; }
-  if (n >= 100)      { w += numToWords(Math.floor(n/100))      + ' Hundred '; n %= 100; }
-  if (n > 0) {
-    if (n < 20) w += _ones[n] + ' ';
-    else { w += _tens[Math.floor(n/10)] + ' '; if (n % 10) w += _ones[n%10] + ' '; }
-  }
-  return w.trim();
-}
-
-function amountInWords(total) {
-  let rupees = Math.floor(total);
-  let paise  = Math.round((total - rupees) * 100);
-  let w = 'INR: ' + numToWords(rupees) + ' Rupee' + (rupees !== 1 ? 's' : '');
-  if (paise > 0) w += ' and ' + numToWords(paise) + ' Paise';
-  return w + ' Only';
-}
-
-/* ── Row management ── */
-let rowCount = 0;
-
-function addRow() {
-  rowCount++;
-  const id = rowCount;
-  const tr = document.createElement('tr');
-  tr.id = 'row-' + id;
-  tr.innerHTML = `
-    <td><input type="number" value="${id}" min="1" style="width:46px;text-align:center" /></td>
-    <td><input type="text" placeholder="Item description" style="min-width:160px" /></td>
-    <td><input type="text" placeholder="9403" style="text-align:center" /></td>
-    <td><input type="number" placeholder="0.00" min="0" step="0.01" class="rate-input" style="text-align:right" oninput="updateRowTotal(${id})" /></td>
-    <td><input type="number" value="1" min="1" class="qty-input" style="text-align:center;width:60px" oninput="updateRowTotal(${id})" /></td>
-    <td class="row-total" id="rt-${id}">0.00</td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeRow(${id})">✕</button></td>
-  `;
-  document.getElementById('itemsBody').appendChild(tr);
-}
-
-function removeRow(id) {
-  document.getElementById('row-' + id)?.remove();
-}
-
-function updateRowTotal(id) {
-  const row = document.getElementById('row-' + id);
-  if (!row) return;
-  const rate    = parseFloat(row.querySelector('.rate-input').value) || 0;
-  const qty     = parseFloat(row.querySelector('.qty-input').value)  || 0;
-  const inclTax = document.getElementById('priceInclTax').checked;
-  const gst     = parseFloat(document.getElementById('gstRate').value) || 0;
-  const base    = inclTax ? rate / (1 + gst / 100) : rate;
-  document.getElementById('rt-' + id).textContent = fmtINR(base * qty);
-}
-
-function recalcAll() {
-  document.querySelectorAll('#itemsBody tr').forEach(tr => updateRowTotal(tr.id.replace('row-', '')));
-}
-
-/* ── Generate Bill ── */
-function generateBill() {
-  const inclTax = document.getElementById('priceInclTax').checked;
-  const gst     = parseFloat(document.getElementById('gstRate').value) || 0;
-  const rows    = document.querySelectorAll('#itemsBody tr');
-  if (!rows.length) { alert('Please add at least one item.'); return; }
-
-  let items = [], amtBefore = 0;
-  rows.forEach((tr, i) => {
-    const inp  = tr.querySelectorAll('input');
-    const slNo = inp[0].value || (i + 1);
-    const name = inp[1].value || '—';
-    const hsn  = inp[2].value || '';
-    const rate = parseFloat(inp[3].value) || 0;
-    const qty  = parseFloat(inp[4].value) || 1;
-    const base = inclTax ? rate / (1 + gst / 100) : rate;
-    const total = base * qty;
-    amtBefore += total;
-    items.push({ slNo, name, hsn, rate: base, qty, total });
-  });
-
-  const gstAmt   = amtBefore * gst / 100;
-  const totalAmt = amtBefore + gstAmt;
-  const halfGst  = gstAmt / 2;
-  const halfPct  = gst / 2;
-
-  // Inputs
-  const buyerName  = document.getElementById('buyerName').value;
-  const buyerAddr  = document.getElementById('buyerAddr').value;
-  const buyerPhone = document.getElementById('buyerPhone').value;
-  const buyerGSTIN = document.getElementById('buyerGSTIN').value;
-  const invoiceNo  = document.getElementById('invoiceNo').value || 'SF —';
-  const invoiceDate= formatDate(document.getElementById('invoiceDate').value);
-  const bkName     = document.getElementById('bankName').value;
-  const bkBranch   = document.getElementById('bankBranch').value;
-  const bkAcc      = document.getElementById('bankAcc').value;
-  const bkIFSC     = document.getElementById('bankIFSC').value;
-
-  // Item rows HTML
-  const rowsHtml = items.map(it => `
-    <tr>
-      <td>${String(it.slNo).padStart(2,'0')}</td>
-      <td class="item-name">${esc(it.name)}</td>
-      <td>${esc(it.hsn)}</td>
-      <td>${fmtINR(it.rate)}</td>
-      <td>${it.qty}</td>
-      <td>${fmtINR(it.total)}</td>
-    </tr>
-  `).join('');
-
-  // Buyer block
-  let buyerHtml = `<span class="buyer-label">BUYER:</span><br>
-    <span class="buyer-name">${esc(buyerName)}</span>${buyerAddr ? '<br>' + esc(buyerAddr).replace(/\n/g,'<br>') : ''}
-    ${buyerPhone ? '<br><br>Ph. No. ' + esc(buyerPhone) : ''}
-    ${buyerGSTIN ? '<br>GSTIN: ' + esc(buyerGSTIN).toUpperCase() : ''}`;
-
-  // Tax rows HTML  (IGST vs CGST+SGST)
-  let taxRowsHtml = '';
-  if (taxType === 'igst') {
-    taxRowsHtml = `
-      <div class="summary-row">
-        <div class="add-block">
-          <div class="add-head">ADD:</div>
-          <div>${gst}% IGST</div>
-        </div>
-        <span class="amt">${fmtINR(gstAmt)}</span>
-      </div>`;
-  } else {
-    taxRowsHtml = `
-      <div class="summary-row">
-        <div class="add-block">
-          <div class="add-head">ADD:</div>
-          <div>CGST @ ${halfPct}%</div>
-        </div>
-        <span class="amt">${fmtINR(halfGst)}</span>
-      </div>
-      <div class="summary-row">
-        <div class="add-block" style="padding-left:4px">
-          <div>SGST @ ${halfPct}%</div>
-        </div>
-        <span class="amt">${fmtINR(halfGst)}</span>
-      </div>`;
-  }
-
-  document.getElementById('bill').innerHTML = `
-    <!-- "INVOICE" title -->
-    <div class="invoice-title">Invoice</div>
-
-    <!-- Shop header -->
-    <div class="bill-header">
-      <div class="shop-name">Shivam Furniture</div>
-      <div class="shop-addr">Narkashur, Kahilipara, Opp Bharat Petroleum</div>
-      <div class="shop-addr">Guwahati - 781019</div>
-      <div class="shop-phone">Phone:- 9957184205</div>
-      <div class="shop-gstin"><strong>GSTIN - 18ALVPD2044B1ZD</strong></div>
-    </div>
-
-    <!-- Serial No -->
-    <div class="meta-row">
-      <span><strong>SERIAL NO. ${esc(invoiceNo)}</strong></span>
-    </div>
-
-    <!-- Buyer + Date -->
-    <div class="buyer-box">
-      <div class="buyer-left">${buyerHtml}</div>
-      <div class="buyer-date"><strong>DATE:</strong> ${invoiceDate}</div>
-    </div>
-
-    <!-- Items table -->
-    <table class="items">
-      <thead>
-        <tr>
-          <th style="width:42px">SL NO</th>
-          <th>ITEM</th>
-          <th style="width:75px">HSN CODE</th>
-          <th style="width:82px">RATE</th>
-          <th style="width:70px">QUANTITY</th>
-          <th style="width:95px">TOTAL AMOUNT</th>
-        </tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody>
-    </table>
-
-    <!-- Totals -->
-    <div class="summary-row bold-row">
-      <span>AMOUNT BEFORE TAX</span>
-      <span class="amt">${fmtINR(amtBefore)}</span>
-    </div>
-    ${taxRowsHtml}
-    <div class="summary-row total-row">
-      <span>TOTAL AMOUNT AFTER TAX</span>
-      <span class="amt">${fmtINR(totalAmt)}</span>
-    </div>
-
-    <!-- Amount in words -->
-    <div class="words-section">
-      <div class="words-lbl">Amount Chargeable (in words)</div>
-      <div class="words-val">${amountInWords(totalAmt)}</div>
-    </div>
-
-    <!-- Spacer + bank + signature pushed to bottom -->
-    <div class="bill-body">
-      <!-- Bank Details -->
-      <div class="bank-section">
-        <div class="bank-title">Company's Bank Details</div>
-        <div class="bank-grid">
-          <span class="bank-key">Bank Name</span>   <span>${esc(bkName)}</span>
-          <span class="bank-key">Branch Name</span> <span>${esc(bkBranch)}</span>
-          <span class="bank-key">A/C Number</span>  <span>${esc(bkAcc)}</span>
-          <span class="bank-key">IFSC Code</span>   <span>${esc(bkIFSC)}</span>
-        </div>
-      </div>
-
-      <!-- Signature footer -->
-      <div class="sign-section">
-        <img src="${localStorage.getItem('shivam_sig') || 'signature.png'}" alt="Signature" class="signature-img" onerror="this.style.display='none'" />
-        <div class="sign-name">(Shivam Furniture)</div>
-      </div>
-    </div>
-  `;
-
-  const wrap = document.getElementById('preview-wrap');
-  wrap.classList.add('visible');
-  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function printBill() {
-  if (!document.getElementById('preview-wrap').classList.contains('visible')) {
-    generateBill();
-    setTimeout(() => window.print(), 450);
-  } else {
-    window.print();
-  }
-}
-
-function clearAll() {
-  if (!confirm('Clear all fields and items?')) return;
-  ['invoiceNo','invoiceDate','buyerName','buyerAddr','buyerPhone','buyerGSTIN'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('itemsBody').innerHTML = '';
-  rowCount = 0;
-  document.getElementById('preview-wrap').classList.remove('visible');
-  document.getElementById('invoiceDate').valueAsDate = new Date();
-}
-
-function handleSetupSignature(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt) {
-    localStorage.setItem('shivam_sig', evt.target.result);
-    alert('Signature successfully saved! It will automatically appear on all bills.');
-    if (document.getElementById('preview-wrap').classList.contains('visible')) {
-      generateBill(); // Refresh preview automatically
+      recalcAll();
     }
-  };
-  reader.readAsDataURL(file);
-}
 
-/* ── Helpers ── */
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function formatDate(d) {
-  if (!d) return '—';
-  const [y, m, day] = d.split('-');
-  return `${day}-${m}-${y.slice(2)}`;
-}
+    function togglePriceIncl() {
+      const priceToggle = document.getElementById('priceInclTax');
+      const wrap = document.getElementById('priceWrap');
+      if(priceToggle.checked) { wrap.classList.add('on-bg'); } else { wrap.classList.remove('on-bg'); }
+      recalcAll();
+    }
 
-/* ── Init ── */
-document.getElementById('invoiceDate').valueAsDate = new Date();
-addRow();
-document.getElementById('gstRate').addEventListener('input', recalcAll);
-document.getElementById('priceInclTax').addEventListener('change', recalcAll);
-</script>
+    function setTaxType(t) {
+      taxType = t;
+      document.getElementById('btn-igst').classList.toggle('active', t === 'igst');
+      document.getElementById('btn-cgst').classList.toggle('active', t === 'cgst');
+      document.getElementById('tax-hint').textContent = t === 'igst' ? 'Single IGST line on bill.' : 'Tax split equally: CGST + SGST (half each).';
+    }
+
+    /* ── Indian number format ── */
+    function fmtINR(n) {
+      n = Math.round(n * 100) / 100;
+      let [int, dec] = n.toFixed(2).split('.');
+      let last3 = int.slice(-3);
+      let rest = int.slice(0, -3);
+      if (rest.length) last3 = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
+      return last3 + '.' + dec;
+    }
+
+    /* ── Amount in words ── */
+    const _ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const _tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    function numToWords(n) {
+      n = Math.round(n);
+      if (n === 0) return 'Zero';
+      let w = '';
+      if (n >= 10000000) { w += numToWords(Math.floor(n / 10000000)) + ' Crore '; n %= 10000000; }
+      if (n >= 100000) { w += numToWords(Math.floor(n / 100000)) + ' Lakh '; n %= 100000; }
+      if (n >= 1000) { w += numToWords(Math.floor(n / 1000)) + ' Thousand '; n %= 1000; }
+      if (n >= 100) { w += numToWords(Math.floor(n / 100)) + ' Hundred '; n %= 100; }
+      if (n > 0) {
+        if (n < 20) w += _ones[n] + ' ';
+        else { w += _tens[Math.floor(n / 10)] + ' '; if (n % 10) w += _ones[n % 10] + ' '; }
+      }
+      return w.trim();
+    }
+    function amountInWords(total) {
+      let rupees = Math.floor(total);
+      let paise = Math.round((total - rupees) * 100);
+      let w = 'INR: ' + numToWords(rupees) + ' Rupee' + (rupees !== 1 ? 's' : '');
+      if (paise > 0) w += ' and ' + numToWords(paise) + ' Paise';
+      return w + ' Only';
+    }
+
+    /* ── Row management ── */
+    let rowCount = 0;
+    function addRow() {
+      rowCount++;
+      const id = rowCount;
+      const tr = document.createElement('tr');
+      tr.id = 'row-' + id;
+      tr.innerHTML = `
+        <td style="width:40px"><input type="number" value="${id}" min="1" class="ios-num" /></td>
+        <td><input type="text" placeholder="Item description" class="ios-text" /></td>
+        <td style="width:80px"><input type="text" placeholder="HSN" class="ios-text" style="text-align:center" /></td>
+        <td style="width:100px"><input type="number" placeholder="0.00" min="0" step="0.01" class="rate-input ios-num" oninput="updateRowTotal(${id})" /></td>
+        <td style="width:60px"><input type="number" value="1" min="1" class="qty-input ios-num" oninput="updateRowTotal(${id})" /></td>
+        <td style="width:100px;text-align:right" class="row-total" id="rt-${id}">0.00</td>
+        <td style="width:44px;text-align:center"><button class="btn-circular-delete" onclick="removeRow(${id})"><span>–</span></button></td>
+      `;
+      document.getElementById('itemsBody').appendChild(tr);
+    }
+    function removeRow(id) { document.getElementById('row-' + id)?.remove(); }
+    
+    function updateRowTotal(id) {
+      const row = document.getElementById('row-' + id);
+      if (!row) return;
+      const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+      const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+      const isComp = document.getElementById('compositeBill') && document.getElementById('compositeBill').checked;
+      const inclTax = document.getElementById('priceInclTax').checked && !isComp;
+      const gst = isComp ? 0 : (parseFloat(document.getElementById('gstRate').value) || 0);
+      const base = inclTax ? rate / (1 + gst / 100) : rate;
+      document.getElementById('rt-' + id).textContent = fmtINR(base * qty);
+    }
+    function recalcAll() { document.querySelectorAll('#itemsBody tr').forEach(tr => updateRowTotal(tr.id.replace('row-', ''))); }
+
+    /* ── Generate Bill ── */
+    function generateBill() {
+      const isComp = document.getElementById('compositeBill') && document.getElementById('compositeBill').checked;
+      const inclTax = document.getElementById('priceInclTax').checked && !isComp;
+      const gst = isComp ? 0 : (parseFloat(document.getElementById('gstRate').value) || 0);
+      const rows = document.querySelectorAll('#itemsBody tr');
+      if (!rows.length) { alert('Please add at least one item.'); return; }
+
+      let items = [], amtBefore = 0;
+      rows.forEach((tr, i) => {
+        const inp = tr.querySelectorAll('input');
+        const slNo = inp[0].value || (i + 1);
+        const name = inp[1].value || '—';
+        const hsn = inp[2].value || '';
+        const rate = parseFloat(inp[3].value) || 0;
+        const qty = parseFloat(inp[4].value) || 1;
+        const base = inclTax ? rate / (1 + gst / 100) : rate;
+        const total = base * qty;
+        amtBefore += total;
+        items.push({ slNo, name, hsn, rate: base, qty, total });
+      });
+
+      const gstAmt = amtBefore * gst / 100;
+      const totalAmt = amtBefore + gstAmt;
+      const halfGst = gstAmt / 2;
+      const halfPct = gst / 2;
+
+      const buyerName = document.getElementById('buyerName').value;
+      const buyerAddr = document.getElementById('buyerAddr').value;
+      const buyerPhone = document.getElementById('buyerPhone').value;
+      const buyerGSTIN = document.getElementById('buyerGSTIN').value;
+      const invoiceNo = document.getElementById('invoiceNo').value || 'SF —';
+      const invoiceDate = formatDate(document.getElementById('invoiceDate').value);
+      const bkName = document.getElementById('bankName').value;
+      const bkBranch = document.getElementById('bankBranch').value;
+      const bkAcc = document.getElementById('bankAcc').value;
+      const bkIFSC = document.getElementById('bankIFSC').value;
+
+      const rowsHtml = items.map(it => `
+        <tr>
+          <td>${String(it.slNo).padStart(2, '0')}</td>
+          <td class="item-name">${esc(it.name)}</td>
+          <td>${esc(it.hsn)}</td>
+          <td>${fmtINR(it.rate)}</td>
+          <td>${it.qty}</td>
+          <td>${fmtINR(it.total)}</td>
+        </tr>
+      `).join('');
+
+      let buyerHtml = `<span class="buyer-label">BUYER:</span><br>
+        <span class="buyer-name">${esc(buyerName)}</span>${buyerAddr ? '<br>' + esc(buyerAddr).replace(/\n/g, '<br>') : ''}
+        ${buyerPhone ? '<br><br>Ph. No. ' + esc(buyerPhone) : ''}
+        ${buyerGSTIN ? '<br>GSTIN: ' + esc(buyerGSTIN).toUpperCase() : ''}`;
+
+      let taxRowsHtml = '';
+      if (isComp) {
+        taxRowsHtml = `
+          <div class="summary-row"><div class="add-block"><div class="add-head">ADD: 0% GST</div></div><span class="amt">0.00</span></div>`;
+      } else if (taxType === 'igst') {
+        taxRowsHtml = `
+          <div class="summary-row"><div class="add-block"><div class="add-head">ADD:</div><div>${gst}% IGST</div></div><span class="amt">${fmtINR(gstAmt)}</span></div>`;
+      } else {
+        taxRowsHtml = `
+          <div class="summary-row"><div class="add-block"><div class="add-head">ADD:</div><div>CGST @ ${halfPct}%</div></div><span class="amt">${fmtINR(halfGst)}</span></div>
+          <div class="summary-row"><div class="add-block" style="padding-left:4px"><div>SGST @ ${halfPct}%</div></div><span class="amt">${fmtINR(halfGst)}</span></div>`;
+      }
+
+      document.getElementById('bill').innerHTML = `
+        <div class="invoice-title">${isComp ? 'BILL OF SUPPLY' : 'INVOICE'}</div>
+        <div class="bill-header">
+          <div class="shop-name">Shivam Furniture</div>
+          <div class="shop-addr">Narkashur, Kahilipara, Opp Bharat Petroleum</div>
+          <div class="shop-addr">Guwahati - 781019</div>
+          <div class="shop-phone">Phone:- 9957184205</div>
+          <div class="shop-gstin"><strong>GSTIN - 18ALVPD2044B1ZD</strong></div>
+        </div>
+        <div class="meta-row"><span><strong>SERIAL NO. ${esc(invoiceNo)}</strong></span></div>
+        ${isComp ? `<div class="composite-notice">Composition Dealer: Not eligible to collect taxes on supplies.</div>` : ''}
+        <div class="buyer-box">
+          <div class="buyer-left">${buyerHtml}</div>
+          <div class="buyer-date"><strong>DATE:</strong> ${invoiceDate}</div>
+        </div>
+        <table class="items">
+          <thead><tr><th style="width:42px">SL NO</th><th>ITEM</th><th style="width:75px">HSN CODE</th><th style="width:82px">RATE</th><th style="width:70px">QUANTITY</th><th style="width:95px">TOTAL AMOUNT</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="summary-row bold-row"><span>AMOUNT BEFORE TAX</span><span class="amt">${fmtINR(amtBefore)}</span></div>
+        ${taxRowsHtml}
+        <div class="summary-row total-row"><span>TOTAL AMOUNT AFTER TAX</span><span class="amt">${fmtINR(totalAmt)}</span></div>
+        <div class="words-section"><div class="words-lbl">Amount Chargeable (in words)</div><div class="words-val">${amountInWords(totalAmt)}</div></div>
+        <div class="bill-body">
+          <div class="bank-section"><div class="bank-title">Company's Bank Details</div><div class="bank-grid">
+            <span class="bank-key">Bank Name</span><span>${esc(bkName)}</span>
+            <span class="bank-key">Branch Name</span><span>${esc(bkBranch)}</span>
+            <span class="bank-key">A/C Number</span><span>${esc(bkAcc)}</span>
+            <span class="bank-key">IFSC Code</span><span>${esc(bkIFSC)}</span>
+          </div></div>
+          <div class="sign-section">
+            <img src="${localStorage.getItem('shivam_sig') || 'signature.png'}" alt="Signature" class="signature-img" onerror="this.style.display='none'" />
+            <div class="sign-name">(Shivam Furniture)</div>
+          </div>
+        </div>
+      `;
+      const wrap = document.getElementById('preview-wrap');
+      wrap.classList.add('visible');
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function printBill() {
+      if (!document.getElementById('preview-wrap').classList.contains('visible')) {
+        generateBill();
+        setTimeout(() => window.print(), 450);
+      } else { window.print(); }
+    }
+
+    function clearAll() {
+      if (!confirm('Clear all fields and items?')) return;
+      ['invoiceNo', 'invoiceDate', 'buyerName', 'buyerAddr', 'buyerPhone', 'buyerGSTIN'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('itemsBody').innerHTML = ''; rowCount = 0;
+      document.getElementById('preview-wrap').classList.remove('visible');
+      document.getElementById('invoiceDate').valueAsDate = new Date();
+    }
+
+    function handleSetupSignature(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        localStorage.setItem('shivam_sig', evt.target.result);
+        alert('Signature successfully saved!');
+        if (document.getElementById('preview-wrap').classList.contains('visible')) { generateBill(); }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function formatDate(d) {
+      if (!d) return '—';
+      const [y, m, day] = d.split('-'); return `${day}-${m}-${y.slice(2)}`;
+    }
+
+    document.getElementById('invoiceDate').valueAsDate = new Date();
+    addRow();
+    document.getElementById('gstRate').addEventListener('input', recalcAll);
+  </script>
 </body>
 </html>
